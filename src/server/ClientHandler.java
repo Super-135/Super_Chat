@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ClientHandler {
     private Server server;
@@ -27,14 +28,31 @@ public class ClientHandler {
             new Thread(() -> {
                 try {
                     //цикл аутентификации
+                    // если пользователь зависнет на этапе подключения или регистрации
+                    socket.setSoTimeout(5000);
                     while (true) {
                         String str = in.readUTF();
+
+                        if (str.startsWith("/reg ")) {
+                            String[] token = str.split(" ");
+                            if (token.length < 4) {
+                                continue;
+                            }
+                            System.out.println(token[1]+token[2]+token[3]);
+                            boolean succeed = server.
+                                    getAuthService().
+                                    registration(token[1],token[2],token[3]);
+                            if (succeed){
+                                sendMsg("Регистрация прошла успешно");
+                            }else {
+                                sendMsg("Регистрация не удалась, возможно логин уже занят");
+                            }
+                        }
 
                         if (str.startsWith("/auth ")) {
                             String[] token = str.split(" ");
 
-                            System.out.println(str);
-                            if (token.length < 2) {
+                            if (token.length < 3) {
                                 continue;
                             }
 
@@ -43,7 +61,6 @@ public class ClientHandler {
 
 
                             loginEnabled = server.getClientByLogin(token[1]);
-                            System.out.println(loginEnabled);
 
                             if (loginEnabled){
                                 sendMsg("Клиент уже подключен.");
@@ -61,6 +78,8 @@ public class ClientHandler {
                             }
                         }
                     }
+
+                    socket.setSoTimeout(0);
 
                     //цикл работы
                     while (true) {
@@ -81,13 +100,21 @@ public class ClientHandler {
                             prvMsg = prv[2];
                         }
                         if (prvNick != ""){
-                            server.privateMsg(nick + ": " + prvMsg, prvNick);
+                            server.privateMsg(nick + ": " + prvMsg, prvNick,this);
                             prvNick = "";
                         }else{
                             server.broadcastMsg(nick + ": " + str);
                         }
                     }
-                } catch (IOException e) {
+
+
+                }
+
+                catch (SocketTimeoutException e){
+                    e.printStackTrace();
+                    sendMsg("/end");
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 } finally {
                     server.unsubscribe(this);

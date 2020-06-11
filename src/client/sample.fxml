@@ -6,15 +6,23 @@
 <VBox fx:controller="client.Controller"
           xmlns:fx="http://javafx.com/fxml" alignment="center">
 
-        <HBox fx:id="authPanel" managed="true">
-            <TextField fx:id="loginField" HBox.hgrow="ALWAYS" promptText="login"/>
-            <PasswordField fx:id="passwordField" HBox.hgrow="ALWAYS" promptText="password"
-                           onAction="#tryToAuth"/>
-            <Button text="Войти" onAction="#tryToAuth" minWidth="50"/>
-        </HBox>
-        <TextArea fx:id="chatLog" VBox.vgrow="ALWAYS" editable="false"  />
-        <HBox fx:id="msgPanel" managed="false" visible="false">
-            <TextField fx:id="myMsg" HBox.hgrow="ALWAYS"  />
-            <Button layoutX="543.0" onAction="#onClickSend"  text="Send" />
-        </HBox>
-</VBox>
+    <HBox fx:id="authPanel" managed="true">
+        <TextField fx:id="loginField" HBox.hgrow="ALWAYS" promptText="login"/>
+        <PasswordField fx:id="passwordField" HBox.hgrow="ALWAYS" promptText="password"
+                       onAction="#tryToAuth"/>
+        <Button text="Войти" onAction="#tryToAuth" minWidth="50"/>
+        <Button text="Новый" onAction="#showRegWindow" minWidth="50"/>
+    </HBox>
+
+    <HBox VBox.vgrow="ALWAYS">
+        <ListView fx:id="clientList" visible="false" managed="false"
+                  onMouseClicked="#clickClientList"/>
+        <TextArea fx:id="chatLog" HBox.hgrow="ALWAYS" editable="false"  />
+    </HBox>
+
+
+    <HBox fx:id="msgPanel" managed="false" visible="false">
+        <TextField fx:id="myMsg" HBox.hgrow="ALWAYS"  />
+        <Button layoutX="543.0" onAction="#onClickSend"  text="Send" />
+    </HBox>
+    </VBox>
