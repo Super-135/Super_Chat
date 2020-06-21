@@ -1,6 +1,8 @@
 package client;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -8,27 +10,36 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Observable;
 import java.util.ResourceBundle;
 
+import static javafx.geometry.NodeOrientation.LEFT_TO_RIGHT;
+import static javafx.geometry.NodeOrientation.RIGHT_TO_LEFT;
+
 public class Controller implements Initializable {
+//    @FXML
+//    public TextArea chatLog;
     @FXML
-    public TextArea chatLog;
+    public ListView<String> chatLog;
     @FXML
     public TextField myMsg;
     @FXML
@@ -42,6 +53,7 @@ public class Controller implements Initializable {
     @FXML
     public ListView<String> clientList;
 
+
     Stage regStage;
 
     Socket socket;
@@ -54,6 +66,16 @@ public class Controller implements Initializable {
     private boolean authenticated;
     private String nick;
 
+//    static class  Cell extends ListCell<String> {
+//
+//        VBox vBox = new VBox();
+//        Label label = new Label("Super Cell");
+//
+//
+//
+//
+//    }
+
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
@@ -65,7 +87,9 @@ public class Controller implements Initializable {
         if (!authenticated) {
             nick = "";
         }
-        chatLog.clear();
+        Platform.runLater(() -> {
+            chatLog.getItems().clear();
+        });
         setTitle(nick);
     }
 
@@ -104,7 +128,7 @@ public class Controller implements Initializable {
                     while (true) {
                         String str = in.readUTF();
 
-                        System.out.println(str);
+
 
                         if (str.startsWith("/authok ")) {
                             nick = str.split(" ")[1];
@@ -112,7 +136,11 @@ public class Controller implements Initializable {
                             break;
                         }
 
-                        chatLog.appendText(str + "\n");
+                        //chatLog.appendText(str + "\n");
+                        Platform.runLater(() -> {
+                            chatLog.getItems().add(str + "\n");
+                        });
+
                     }
 
                     //цикл работы
@@ -135,7 +163,9 @@ public class Controller implements Initializable {
                             }
 
                         } else {
-                            chatLog.appendText(str + "\n");
+                            Platform.runLater(() -> {
+                                chatLog.getItems().add(str + "\n");
+                            });
                         }
                     }
                 } catch (IOException e) {
@@ -241,5 +271,7 @@ public class Controller implements Initializable {
         System.out.println(clientList.getSelectionModel().getSelectedItem());
         String receiver = clientList.getSelectionModel().getSelectedItem();
         myMsg.setText("/w " + receiver + " ");
-    }
+     }
+
+
 }
